@@ -16,7 +16,7 @@ class AvatarClass{
 	}
 
 	function getBuildInAvatar($avatarId){
-		$avatarUrl='http://vline.zhengzi.me/static/avatar'.$avatarId.'.jpg';
+		$avatarUrl='http://vline.zhengzi.me/static/avatar/'.$avatarId.'.jpg';
 		return $avatarUrl;
 	}
 }

@@ -1,6 +1,7 @@
 <?php
 // $arr=array('userName'=>'f179ff3a942bffdb2d21e47141198134','userPasswd'=>'cdb81d66c64980d4201d2f726c7b9f3f');
-$arr=array('codeType'=>'1','codeContent'=>'fjaidfjoaifjioad');
+// $arr=array('codeType'=>'1','codeContent'=>'fjaidfjoaifjioad');
+$arr=array('userName'=>'111','userPasswdHash'=>'222','codeId'=>'0','msgContent'=>'llalalalalatatata','redUserName'=>'111','redMsgId'=>'13');
 $json=json_encode($arr);
 echo $json;
 

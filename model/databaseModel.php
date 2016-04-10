@@ -64,10 +64,13 @@ class databaseModelClass extends Mysql{
 				"user_lastlogintime" => time()
 			);
 			$this->insert("user", $dataArray);
+			$avatar=$dataArray['user_avatar'];
+			$avatarId=explode('_',$avatar)[1];
+			$avatarUrl=$this->avatar->getBuildInAvatar($avatarId);
 			$result = array(
 					"userName" => $dataArray["user_name"],
 					"userPasswdHash" => $dataArray["user_passwdhash"],
-					"userAvatar" => $dataArray["user_avatar"],
+					"userAvatar" => $avatarUrl,
 					"userNickName"=> $dataArray["user_nickname"]
 				);
 			return $result;
@@ -135,7 +138,7 @@ class databaseModelClass extends Mysql{
 
 
 	// send msg should verity username and password!
-	public function msgSend($codeId, $username, $msgContent, $msgCoordinate, $msgLocation){
+	public function msgSend($codeId, $username, $msgContent, $msgCoordinate, $msgLocation, $redUserName=NULL, $redMsgId=NULL){
 		$userId = $this->get_one("user_id", "user", "user_name='$username'")["user_id"];
 		//print_r($userId);
 		$dataArray = array(
@@ -147,15 +150,51 @@ class databaseModelClass extends Mysql{
 			"msg_time" => time()
 		);
 		$this->insert("msg", $dataArray);
+		if(isset($redUserName)&&isset($redMsgId))
+			$this->msgRes($userName, $redUserName, $redMsgId);
 	}
 	public function getUserMsgs($username){
-		$userId = $this->get_one("user_id", "user", "user_name='$username'")["user_id"];
-		$msgs = $this->get_all("*", "msg", "user_id='$userId'");
-		return $msgs;
+		$msg= $this->get_one("*", "user", "user_name='$username'");
+			$avatar=$msg['user_avatar'];
+			$avatarId=explode('_',$avatar)[1];
+			$avatarUrl=$this->avatar->getBuildInAvatar($avatarId);
+			$userMsg=array(
+				'userName'=>$msg['user_name'],
+				'userAvatar'=>$avatarUrl,
+				'userNickName'=>$msg['user_nickname'],
+				'userPasswdHash'=>$msg['user_passwdhash'],
+				);
+		return $userMsg;
 	}
 	public function getCodeMsgs($codeId){
+		$codeMsgs=array();
 		$msgs = $this->get_all("*", "msg", "code_id='$codeId'");
-		return $msgs;
+		$i=0;
+		foreach($msgs as $msg){
+			$user=$this->get_one('*','user',"user_id='{$msg['user_id']}'");	
+			$avatar=$user['user_avatar'];
+			@$avatarId=explode('_',$avatar)[1];
+			if(!$avatarId){
+				$avatarId=1;
+			}
+			$avatarUrl=$this->avatar->getBuildInAvatar($avatarId);
+			$nick=$user['user_nickname'];
+			$nick=substr($nick,0,strlen($nick)-1);
+			$codeMsg=array(
+				//'userName'=>$user['user_name'],
+				'userAvatar'=>$avatarUrl,
+				'userNickName'=>$nick,
+				'msgId'=>$msg['msg_id'],
+				'msgContent'=>$msg['msg_content'],
+				//'msgCoordinate'=>$msg['msg_coordinate'],
+				//'msgLocation'=>$msg['msg_location'],
+				'msgTime'=>$msg['msg_time'],
+				//'reUserId'=>$msg['re_user_id'],
+				);
+			$codeMsgs["$i"]=$codeMsg;
+			$i++;
+		}
+		return $codeMsgs;
 	}
 	// response msg should verify reUser's username and password!
 	public function msgRes($reUser, $redUser, $msgId){
@@ -176,62 +215,13 @@ class databaseModelClass extends Mysql{
 
 	public function changeAvatar($userName,$avatarId){
 		$avatarUpdateArr=array('user_avatar'=>'buildin_'.$avatarId);
-		$this->update('user',$avatarUpdateArr,"user_name=$userName");
+		$this->update('user',$avatarUpdateArr,"user_name='$userName'");
 		$avatarUrl=$this->avatar->getBuildInAvatar($avatarId);	
 		return $avatarUrl;
 	}
 	public function changeNickName($userName,$nickName){
 		$nickUpdateArr=array('user_nickname'=>$nickName);
-		$this->update('user',$nickUpdateArr,"user_name=$userName");
+		$this->update('user',$nickUpdateArr,"user_name='$userName'");
 	}
 
 }
-?>
-
-<!-- <html>
-<head>
-	<title>A test</title>
-</head>
-<body> -->
-
-<?php
-
-// $ops = new databaseModelClass();
-
-// if($ops->userLoginOp()){
-// 	echo "<p>user login success!</p>";
-// }else{
-// 	echo "<p>user login error!\n</p>";
-// }
-
-// $tempFR = $ops->falseReg();
-// echo '<p>'.$tempFR["userName"].'</p>';
-// echo '<p>'.$tempFR["userPasswdHash"].'</p>';
-// echo '<p>'.$tempFR["userAvatar"].'</p>';
-// echo '<p>'.$tempFR["userNickName"].'</p>';
-// if($ops->userLoginOp($tempFR["userName"], $tempFR["userPasswdHash"])){
-// 	echo "<p>user login success!</p>";
-// }else{
-// 	echo "<p>user login error!\n</p>";
-// }
-
-// $tempTR = $ops->trueReg("xiaofeng", "xiaofeng", $tempFR["userName"], $tempFR["userPasswdHash"]);
-// echo '<p>'.$tempTR.'</p>';
-// if($tempTR){
-// 	echo "<p>user login success!</p>";
-// }else{
-// 	echo "<p>user login error!\n</p>";
-// }
-
-// $ops->msgSend("xx00xx", "xiaofeng", md5("xiaofeng"), "This is a test", "beijing", "Haidian");
-// $ops->msgSend("xx00xx", "xiaofeng", md5("xiaofeng"), "This is a test 2", "beijing", "Haidian");
-// $ops->msgSend("xx00xx", "xiaofeng", md5("xiaofeng"), "This is a test 3", "beijing", "Haidian");
-// $myMsgs = $ops->getUserMsgs("xiaofeng", md5("xiaofeng"));
-// echo '<p>'.print_r($myMsgs).'</p>';
-
-// $ops->msgRes("xiaofeng", "111", $myMsgs[0]["msg_id"]);
-
-?>
-<!-- 
-</body>
-</html> -->

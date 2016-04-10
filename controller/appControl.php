@@ -23,7 +23,7 @@ $codeObj=new CodeClass();
 //!msgSend:codeId/userName/msgContent/msgCorrdinate/msgLocation:true
 //!getUserMsgs:userName:userMsgs
 //!getCodeMsgs:codeId:codeMsgs
-//!reMsg:reUser/redUser/msgId/true
+//!reMsg:reUser/redUser/msgId:true
 //!changeUserAvatar:userName/avatarId:avatarUrl
 //!changeUserNickName:userName/nickName:true
 
@@ -166,6 +166,7 @@ function getBuildInAvatar($avatarObj,$para){
 
 function scanCode($databaseObj,$para){
 	@$codeType=$para['codeType'];
+	$codeType=0;
 	@$codeContent=$para['codeContent'];
 	if(!isset($codeType)||!isset($codeContent)){
 		halt(15);
@@ -188,12 +189,15 @@ function msgSend($databaseObj,$para){
 	@$userName=$para['userName'];
 	@$msgContent=$para['msgContent'];
 	@$msgCorrdinate=$para['msgCorrdinate'];
+	$msgCorrdinate='test';
 	@$msgLocation=$para['msgLocation'];
-	if(!isset($codeId)||!isset($userName)||!isset($userPasswdHash)||
+	$msgLocation='test';
+	@$redMsgId=$para['redMsgId'];
+	if(!isset($codeId)||!isset($userName)||
 		!isset($msgContent)||!isset($msgCorrdinate)||!isset($msgLocation)){
 		halt(16);
 	}
-	$databaseObj->msgSend($codeId,$userName,$msgContent,$msgCorrdinate,$msgLocation);
+	$databaseObj->msgSend($codeId,$userName,$msgContent,$msgCorrdinate,$msgLocation,$redMsgId);
 	reply(true);
 }
 function getUserMsgs($databaseObj,$para){
@@ -209,7 +213,7 @@ function getCodeMsgs($databaseObj,$para){
 	if(!isset($codeId)){
 		halt(19);
 	}
-	$codeMsgs=$databaseObj->getCodeMsgs($codeeId);
+	$codeMsgs=$databaseObj->getCodeMsgs($codeId);
 	reply($codeMsgs);
 }
 function reMsg($databaseObj,$para){

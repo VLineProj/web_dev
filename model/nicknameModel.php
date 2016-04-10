@@ -8,6 +8,8 @@ $dataObj=new Mysql();
 $dataObj->delete('nick','1=1');
 $i=0;
 foreach ($nickNameExplode as $nick) {
+	$nick=substr($nick,0,strlen($nick)-1);
+	var_dump($nick);
 	$insertArray=array('nick_id'=>$i,'nick_name'=>$nick);
 	$dataObj->insert('nick',$insertArray);
 	$i++;
